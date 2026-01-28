@@ -24,6 +24,18 @@ app.post('/todos', (req, res) => {
   res.json(newTodo);
 });
 
+// Update a todo (toggle completion or edit task)
+app.put('/todos/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const { task, completed } = req.body;
+
+  const updatedTodo = todoModel.updateTodo(id, { task, completed });
+  if (!updatedTodo) {
+    return res.status(404).json({ error: 'Todo not found' });
+  }
+  res.json(updatedTodo);
+});
+
 // Delete a todo
 app.delete('/todos/:id', (req, res) => {
   const id = parseInt(req.params.id);

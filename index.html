@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <style>
     body {
-      background-color: white;
+      background-color: #f9f9f9;
       font-family: Arial, sans-serif;
       margin: 40px;
     }
@@ -23,7 +23,16 @@
     li {
       margin: 8px 0;
       display: flex;
+      align-items: center;
       justify-content: space-between;
+    }
+    .task-text {
+      flex: 1;
+      margin-left: 10px;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: gray;
     }
   </style>
 </head>
@@ -39,37 +48,85 @@
     const API_URL = 'http://localhost:3000/todos';
 
     async function fetchTodos() {
-      const res = await fetch(API_URL);
-      const todos = await res.json();
-      const list = document.getElementById('todoList');
-      list.innerHTML = '';
-      todos.forEach(todo => {
-        const li = document.createElement('li');
-        li.textContent = todo.task;
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Delete';
-        delBtn.onclick = () => deleteTodo(todo.id);
-        li.appendChild(delBtn);
-        list.appendChild(li);
-      });
+      try {
+        const res = await fetch(API_URL);
+        const todos = await res.json();
+        const list = document.getElementById('todoList');
+        list.innerHTML = '';
+
+        todos.forEach(todo => {
+          const li = document.createElement('li');
+
+          // Checkbox for completion
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = todo.completed || false;
+          checkbox.onchange = async () => {
+            await toggleComplete(todo);
+          };
+
+          const span = document.createElement('span');
+          span.textContent = todo.task;
+          span.className = 'task-text';
+          if (todo.completed) span.classList.add('completed');
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Delete';
+          delBtn.onclick = () => deleteTodo(todo.id);
+
+          li.appendChild(checkbox);
+          li.appendChild(span);
+          li.appendChild(delBtn);
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error('Error fetching todos:', err);
+      }
     }
 
     async function addTodo() {
-      const task = document.getElementById('taskInput').value;
+      const task = document.getElementById('taskInput').value.trim();
       if (!task) return;
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task })
-      });
-      document.getElementById('taskInput').value = '';
-      fetchTodos();
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, completed: false })
+        });
+        document.getElementById('taskInput').value = '';
+        fetchTodos();
+      } catch (err) {
+        console.error('Error adding todo:', err);
+      }
     }
 
     async function deleteTodo(id) {
-      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      fetchTodos();
+      try {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        fetchTodos();
+      } catch (err) {
+        console.error('Error deleting todo:', err);
+      }
     }
+
+    async function toggleComplete(todo) {
+      try {
+        await fetch(`${API_URL}/${todo.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...todo, completed: !todo.completed })
+        });
+        fetchTodos();
+      } catch (err) {
+        console.error('Error updating todo:', err);
+      }
+    }
+
+    // Allow pressing Enter to add task
+    document.getElementById('taskInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') addTodo();
+    });
 
     fetchTodos();
   </script>

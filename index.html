@@ -11,10 +11,22 @@
     }
     h1 {
       text-align: center;
+      color: #333;
     }
     input, button {
-      padding: 8px;
+      padding: 8px 12px;
       margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background-color: #007bff;
+      color: white;
+      transform: scale(1.05);
     }
     ul {
       list-style-type: none;
@@ -25,24 +37,67 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: #fff;
+      padding: 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.4s forwards;
     }
     .task-text {
       flex: 1;
       margin-left: 10px;
+      transition: color 0.3s, text-decoration 0.3s;
     }
     .completed {
       text-decoration: line-through;
       color: gray;
     }
+    li:hover {
+      transform: scale(1.02);
+      transition: transform 0.2s;
+    }
+    .delete-btn {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      transition: background-color 0.3s;
+    }
+    .delete-btn:hover {
+      background-color: #cc0000;
+    }
+    .clear-btn {
+      display: block;
+      margin: 15px auto;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      transition: background-color 0.3s;
+    }
+    .clear-btn:hover {
+      background-color: #5a6268;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body>
   <h1>Todo App</h1>
-  <div>
+  <div style="text-align:center;">
     <input id="taskInput" type="text" placeholder="Enter a task">
     <button onclick="addTodo()">Add</button>
   </div>
   <ul id="todoList"></ul>
+  <button class="clear-btn" onclick="clearCompleted()">Clear Completed</button>
 
   <script>
     const API_URL = 'http://localhost:3000/todos';
@@ -53,11 +108,10 @@
         const todos = await res.json();
         const list = document.getElementById('todoList');
         list.innerHTML = '';
-
         todos.forEach(todo => {
           const li = document.createElement('li');
 
-          // Checkbox for completion
+          // Checkbox
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.checked = todo.completed || false;
@@ -65,13 +119,16 @@
             await toggleComplete(todo);
           };
 
+          // Task text
           const span = document.createElement('span');
           span.textContent = todo.task;
           span.className = 'task-text';
           if (todo.completed) span.classList.add('completed');
 
+          // Delete button
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
+          delBtn.className = 'delete-btn';
           delBtn.onclick = () => deleteTodo(todo.id);
 
           li.appendChild(checkbox);
@@ -87,7 +144,6 @@
     async function addTodo() {
       const task = document.getElementById('taskInput').value.trim();
       if (!task) return;
-
       try {
         await fetch(API_URL, {
           method: 'POST',
@@ -123,7 +179,22 @@
       }
     }
 
-    // Allow pressing Enter to add task
+    async function clearCompleted() {
+      try {
+        const res = await fetch(API_URL);
+        const todos = await res.json();
+        for (const todo of todos) {
+          if (todo.completed) {
+            await fetch(`${API_URL}/${todo.id}`, { method: 'DELETE' });
+          }
+        }
+        fetchTodos();
+      } catch (err) {
+        console.error('Error clearing completed todos:', err);
+      }
+    }
+
+    // Enter key adds task
     document.getElementById('taskInput').addEventListener('keypress', e => {
       if (e.key === 'Enter') addTodo();
     });

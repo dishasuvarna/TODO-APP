@@ -5,19 +5,35 @@
   <title>Todo App</title>
   <style>
     body {
-      background-color: #f9f9f9;
+      background-color: #e9ecef;
       font-family: Arial, sans-serif;
-      margin: 40px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* center vertically */
+    }
+    .container {
+      width: 500px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      text-align: center;
     }
     h1 {
-      text-align: center;
       color: #333;
+      margin-bottom: 20px;
     }
     input, button {
       padding: 8px 12px;
       margin: 5px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      font-size: 14px;
+    }
+    input {
+      width: 280px; /* same size */
     }
     button {
       cursor: pointer;
@@ -31,23 +47,27 @@
     ul {
       list-style-type: none;
       padding: 0;
+      margin-top: 20px;
     }
     li {
-      margin: 8px 0;
+      margin: 10px 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #fff;
-      padding: 8px;
+      background: #f8f9fa;
+      padding: 10px 15px;
       border-radius: 6px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       opacity: 0;
       transform: translateY(10px);
       animation: fadeIn 0.4s forwards;
     }
+    li input[type="checkbox"] {
+      margin-right: 10px;
+    }
     .task-text {
       flex: 1;
-      margin-left: 10px;
+      margin: 0 10px;
       transition: color 0.3s, text-decoration 0.3s;
     }
     .completed {
@@ -71,33 +91,32 @@
     }
     .clear-btn {
       display: block;
-      margin: 15px auto;
+      margin: 20px auto 0;
       background-color: #6c757d;
       color: white;
       border: none;
       border-radius: 4px;
-      padding: 8px 12px;
+      padding: 10px 14px;
       transition: background-color 0.3s;
     }
     .clear-btn:hover {
       background-color: #5a6268;
     }
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <h1>Todo App</h1>
-  <div style="text-align:center;">
-    <input id="taskInput" type="text" placeholder="Enter a task">
-    <button onclick="addTodo()">Add</button>
+  <div class="container">
+    <h1>My Todo List</h1>
+    <div>
+      <input id="taskInput" type="text" placeholder="Type a new task...">
+      <button onclick="addTodo()">Add Task</button>
+    </div>
+    <ul id="todoList"></ul>
+    <button class="clear-btn" onclick="clearCompleted()">Clear Completed Tasks</button>
   </div>
-  <ul id="todoList"></ul>
-  <button class="clear-btn" onclick="clearCompleted()">Clear Completed</button>
 
   <script>
     const API_URL = 'http://localhost:3000/todos';
@@ -115,9 +134,7 @@
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.checked = todo.completed || false;
-          checkbox.onchange = async () => {
-            await toggleComplete(todo);
-          };
+          checkbox.onchange = async () => { await toggleComplete(todo); };
 
           // Task text
           const span = document.createElement('span');
@@ -142,7 +159,8 @@
     }
 
     async function addTodo() {
-      const task = document.getElementById('taskInput').value.trim();
+      const input = document.getElementById('taskInput');
+      const task = input.value.trim();
       if (!task) return;
       try {
         await fetch(API_URL, {
@@ -150,7 +168,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ task, completed: false })
         });
-        document.getElementById('taskInput').value = '';
+        input.value = '';
+        input.focus();
         fetchTodos();
       } catch (err) {
         console.error('Error adding todo:', err);

@@ -5,35 +5,38 @@
   <title>Todo App</title>
   <style>
     body {
-      background-color: #e9ecef;
+      background: linear-gradient(135deg, #e9ecef, #dee2e6); /* subtle gradient */
       font-family: Arial, sans-serif;
       margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh; /* center vertically */
+      height: 100vh;
     }
     .container {
       width: 500px;
       background: #fff;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
       text-align: center;
+      animation: popIn 0.5s ease;
     }
     h1 {
-      color: #333;
+      color: #222;
       margin-bottom: 20px;
+      font-size: 26px;
+      letter-spacing: 1px;
     }
     input, button {
-      padding: 8px 12px;
+      padding: 10px 14px;
       margin: 5px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 14px;
     }
     input {
-      width: 280px; /* same size */
+      width: 280px;
     }
     button {
       cursor: pointer;
@@ -57,7 +60,7 @@
       background: #f8f9fa;
       padding: 10px 15px;
       border-radius: 6px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       opacity: 0;
       transform: translateY(10px);
       animation: fadeIn 0.4s forwards;
@@ -72,7 +75,7 @@
     }
     .completed {
       text-decoration: line-through;
-      color: gray;
+      color: #6c757d;
     }
     li:hover {
       transform: scale(1.02);
@@ -87,7 +90,7 @@
       transition: background-color 0.3s;
     }
     .delete-btn:hover {
-      background-color: #cc0000;
+      background-color: #d00000;
     }
     .clear-btn {
       display: block;
@@ -100,10 +103,19 @@
       transition: background-color 0.3s;
     }
     .clear-btn:hover {
-      background-color: #5a6268;
+      background-color: #495057;
+    }
+    .counter {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #444;
     }
     @keyframes fadeIn {
       to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -116,6 +128,7 @@
     </div>
     <ul id="todoList"></ul>
     <button class="clear-btn" onclick="clearCompleted()">Clear Completed Tasks</button>
+    <div class="counter" id="taskCounter">0 tasks total</div>
   </div>
 
   <script>
@@ -130,19 +143,16 @@
         todos.forEach(todo => {
           const li = document.createElement('li');
 
-          // Checkbox
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.checked = todo.completed || false;
           checkbox.onchange = async () => { await toggleComplete(todo); };
 
-          // Task text
           const span = document.createElement('span');
           span.textContent = todo.task;
           span.className = 'task-text';
           if (todo.completed) span.classList.add('completed');
 
-          // Delete button
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
           delBtn.className = 'delete-btn';
@@ -153,6 +163,8 @@
           li.appendChild(delBtn);
           list.appendChild(li);
         });
+
+        updateCounter(todos);
       } catch (err) {
         console.error('Error fetching todos:', err);
       }
@@ -213,7 +225,13 @@
       }
     }
 
-    // Enter key adds task
+    function updateCounter(todos) {
+      const counter = document.getElementById('taskCounter');
+      const total = todos.length;
+      const completed = todos.filter(t => t.completed).length;
+      counter.textContent = `${total} tasks total (${completed} completed)`;
+    }
+
     document.getElementById('taskInput').addEventListener('keypress', e => {
       if (e.key === 'Enter') addTodo();
     });

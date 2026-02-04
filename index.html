@@ -37,8 +37,9 @@
     }
     input {
       min-width: 180px;
-      max-width: 420px; /* NEW: max limit */
-      transition: width 0.3s ease; /* smooth resize */
+      max-width: 100%;
+      box-sizing: border-box;
+      transition: width 0.3s ease;
     }
     button {
       cursor: pointer;
@@ -72,6 +73,8 @@
       flex: 1;
       margin: 0 10px;
       transition: color 0.3s, text-decoration 0.3s;
+      word-wrap: break-word;
+      cursor: pointer;
     }
     .completed {
       text-decoration: line-through;
@@ -137,10 +140,14 @@
           checkbox.type = 'checkbox';
           checkbox.checked = todo.completed || false;
           checkbox.onchange = async () => { await toggleComplete(todo); };
+
           const span = document.createElement('span');
           span.textContent = todo.task;
           span.className = 'task-text';
           if (todo.completed) span.classList.add('completed');
+
+          // NEW: inline editing on double-click
+          span.ondblclick = () => enableEditing(span, todo);
 
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
@@ -170,6 +177,7 @@
         });
         input.value = '';
         input.focus();
+        input.style.width = '180px';
         fetchTodos();
       } catch (err) {
         console.error('Error adding todo:', err);
@@ -220,12 +228,39 @@
       counter.textContent = `${total} tasks total (${completed} completed)`;
     }
 
-    // NEW: Auto-resize input based on content length
+    // Inline editing function
+    function enableEditing(span, todo) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = todo.task;
+      input.className = 'task-text';
+      span.replaceWith(input);
+      input.focus();
+
+      const save = async () => {
+        const newTask = input.value.trim();
+        if (newTask && newTask !== todo.task) {
+          await fetch(`${API_URL}/${todo.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...todo, task: newTask })
+          });
+        }
+        fetchTodos();
+      };
+
+      input.addEventListener('blur', save);
+      input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') save();
+      });
+    }
+
+    // Auto-resize input while typing
     const taskInput = document.getElementById('taskInput');
     taskInput.addEventListener('input', () => {
       const length = taskInput.value.length;
-      // base width grows with length, capped at max-width
-      taskInput.style.width = Math.min(180 + length * 8, 420) + 'px';
+      const newWidth = Math.min(180 + length * 8, taskInput.parentElement.offsetWidth - 100);
+      taskInput.style.width = newWidth + 'px';
     });
 
     document.getElementById('taskInput').addEventListener('keypress', e => {

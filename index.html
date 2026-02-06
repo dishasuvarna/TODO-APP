@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <style>
     body {
-      background: linear-gradient(135deg, #e9ecef, #dee2e6);
+      background: linear-gradient(135deg, #eef1f4, #dfe4ea);
       font-family: Arial, sans-serif;
       margin: 0;
       display: flex;
@@ -17,8 +17,8 @@
       width: 500px;
       background: #fff;
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      border-radius: 14px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.10);
       text-align: center;
       animation: popIn 0.5s ease;
     }
@@ -36,7 +36,7 @@
       font-size: 14px;
     }
     input {
-      min-width: 180px;
+      min-width: 200px;
       max-width: 100%;
       box-sizing: border-box;
       transition: width 0.3s ease;
@@ -61,14 +61,16 @@
       align-items: center;
       justify-content: space-between;
       background: #f8f9fa;
-      padding: 10px 15px;
-      border-radius: 6px;
+      padding: 12px 16px;
+      border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       opacity: 0;
       transform: translateY(10px);
       animation: fadeIn 0.4s forwards;
     }
-    li input[type="checkbox"] { margin-right: 10px; }
+    li input[type="checkbox"] {
+      margin-right: 10px;
+    }
     .task-text {
       flex: 1;
       margin: 0 10px;
@@ -92,7 +94,9 @@
       padding: 6px 10px;
       transition: background-color 0.3s;
     }
-    .delete-btn:hover { background-color: #d00000; }
+    .delete-btn:hover {
+      background-color: #d00000;
+    }
     .clear-btn {
       display: block;
       margin: 20px auto 0;
@@ -103,14 +107,21 @@
       padding: 10px 14px;
       transition: background-color 0.3s;
     }
-    .clear-btn:hover { background-color: #495057; }
+    .clear-btn:hover {
+      background-color: #495057;
+    }
     .counter {
       margin-top: 15px;
       font-size: 14px;
       color: #444;
     }
-    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-    @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -145,8 +156,6 @@
           span.textContent = todo.task;
           span.className = 'task-text';
           if (todo.completed) span.classList.add('completed');
-
-          // NEW: inline editing on double-click
           span.ondblclick = () => enableEditing(span, todo);
 
           const delBtn = document.createElement('button');
@@ -177,7 +186,7 @@
         });
         input.value = '';
         input.focus();
-        input.style.width = '180px';
+        input.style.width = '200px';
         fetchTodos();
       } catch (err) {
         console.error('Error adding todo:', err);
@@ -228,12 +237,12 @@
       counter.textContent = `${total} tasks total (${completed} completed)`;
     }
 
-    // Inline editing function
     function enableEditing(span, todo) {
       const input = document.createElement('input');
       input.type = 'text';
       input.value = todo.task;
       input.className = 'task-text';
+
       span.replaceWith(input);
       input.focus();
 
@@ -255,11 +264,10 @@
       });
     }
 
-    // Auto-resize input while typing
     const taskInput = document.getElementById('taskInput');
     taskInput.addEventListener('input', () => {
       const length = taskInput.value.length;
-      const newWidth = Math.min(180 + length * 8, taskInput.parentElement.offsetWidth - 100);
+      const newWidth = Math.min(200 + length * 8, taskInput.parentElement.offsetWidth - 80);
       taskInput.style.width = newWidth + 'px';
     });
 

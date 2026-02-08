@@ -13,7 +13,6 @@
       align-items: center;
       height: 100vh;
     }
-
     .container {
       width: 500px;
       background: #fff;
@@ -23,7 +22,6 @@
       text-align: center;
       animation: popIn 0.6s ease-out;
     }
-
     h1 {
       color: #222;
       margin-bottom: 20px;
@@ -31,7 +29,6 @@
       letter-spacing: 1px;
       font-weight: 600;
     }
-
     input, button {
       padding: 10px 14px;
       margin: 5px;
@@ -40,37 +37,31 @@
       font-size: 14px;
       transition: all 0.3s ease;
     }
-
     input {
       min-width: 200px;
       max-width: 100%;
       box-sizing: border-box;
       background-color: #f9fafb;
     }
-
     input:focus {
       border-color: #007bff;
       outline: none;
       box-shadow: 0 0 6px rgba(0,123,255,0.3);
     }
-
     button {
       cursor: pointer;
       background-color: #f1f3f5;
     }
-
     button:hover {
       background-color: #007bff;
       color: white;
       transform: scale(1.05);
     }
-
     ul {
       list-style-type: none;
       padding: 0;
       margin-top: 20px;
     }
-
     li {
       margin: 10px 0;
       display: flex;
@@ -84,13 +75,11 @@
       transform: translateY(12px);
       animation: fadeIn 0.5s forwards ease-out;
     }
-
     li input[type="checkbox"] {
       margin-right: 10px;
       transform: scale(1.2);
       cursor: pointer;
     }
-
     .task-text {
       flex: 1;
       margin: 0 10px;
@@ -98,17 +87,14 @@
       word-wrap: break-word;
       cursor: pointer;
     }
-
     .completed {
       text-decoration: line-through;
       color: #6c757d;
     }
-
     li:hover {
       transform: scale(1.02);
       transition: transform 0.25s ease;
     }
-
     .delete-btn {
       background-color: #ff4d4d;
       color: white;
@@ -117,12 +103,10 @@
       padding: 6px 12px;
       transition: background-color 0.3s, transform 0.2s;
     }
-
     .delete-btn:hover {
       background-color: #d00000;
       transform: scale(1.05);
     }
-
     .clear-btn {
       display: block;
       margin: 20px auto 0;
@@ -133,22 +117,29 @@
       padding: 10px 16px;
       transition: background-color 0.3s, transform 0.2s;
     }
-
     .clear-btn:hover {
       background-color: #495057;
       transform: scale(1.05);
     }
-
     .counter {
       margin-top: 15px;
       font-size: 14px;
       color: #555;
     }
-
+    .quote {
+      margin-top: 20px;
+      font-size: 15px;
+      font-style: italic;
+      color: #444;
+      background: #f1f3f5;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      animation: fadeIn 1s ease-out;
+    }
     @keyframes fadeIn {
       to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes popIn {
       from { transform: scale(0.95); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
@@ -165,8 +156,8 @@
     <ul id="todoList"></ul>
     <button class="clear-btn" onclick="clearCompleted()">Clear Completed Tasks</button>
     <div class="counter" id="taskCounter">0 tasks total</div>
+    <div class="quote" id="quoteBox"></div>
   </div>
-
   <script>
     const API_URL = 'http://localhost:3000/todos';
 
@@ -182,18 +173,15 @@
           checkbox.type = 'checkbox';
           checkbox.checked = todo.completed || false;
           checkbox.onchange = async () => { await toggleComplete(todo); };
-
           const span = document.createElement('span');
           span.textContent = todo.task;
           span.className = 'task-text';
           if (todo.completed) span.classList.add('completed');
           span.ondblclick = () => enableEditing(span, todo);
-
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
           delBtn.className = 'delete-btn';
           delBtn.onclick = () => deleteTodo(todo.id);
-
           li.appendChild(checkbox);
           li.appendChild(span);
           li.appendChild(delBtn);
@@ -275,10 +263,9 @@
       input.className = 'task-text';
       span.replaceWith(input);
       input.focus();
-
       const save = async () => {
         const newTask = input.value.trim();
-        if (newTask && newTask !== todo.task) {
+                 if (newTask && newTask !== todo.task) {
           await fetch(`${API_URL}/${todo.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -287,14 +274,13 @@
         }
         fetchTodos();
       };
-
       input.addEventListener('blur', save);
       input.addEventListener('keypress', e => {
         if (e.key === 'Enter') save();
       });
     }
 
-        const taskInput = document.getElementById('taskInput');
+    const taskInput = document.getElementById('taskInput');
     taskInput.addEventListener('input', () => {
       const length = taskInput.value.length;
       const newWidth = Math.min(200 + length * 8, taskInput.parentElement.offsetWidth - 80);
@@ -305,8 +291,25 @@
       if (e.key === 'Enter') addTodo();
     });
 
+    // Motivational Quotes Feature
+    const quotes = [
+      "Believe you can and you're halfway there.",
+      "Small steps every day lead to big results.",
+      "Your future is created by what you do today.",
+      "Stay positive, work hard, make it happen.",
+      "Don't watch the clock; do what it does. Keep going.",
+      "Success is the sum of small efforts repeated daily."
+    ];
+
+    function showQuote() {
+      const quoteBox = document.getElementById('quoteBox');
+      const randomIndex = Math.floor(Math.random() * quotes.length);
+      quoteBox.textContent = quotes[randomIndex];
+    }
+
     // Initial fetch when page loads
     fetchTodos();
+    showQuote();
   </script>
 </body>
 </html>

@@ -153,11 +153,16 @@
       <input id="taskInput" type="text" placeholder="Type a new task...">
       <button onclick="addTodo()">Add Task</button>
     </div>
+    <!-- NEW FEATURE: Search bar -->
+    <div>
+      <input id="searchInput" type="text" placeholder="Search tasks...">
+    </div>
     <ul id="todoList"></ul>
     <button class="clear-btn" onclick="clearCompleted()">Clear Completed Tasks</button>
     <div class="counter" id="taskCounter">0 tasks total</div>
     <div class="quote" id="quoteBox"></div>
   </div>
+
   <script>
     const API_URL = 'http://localhost:3000/todos';
 
@@ -165,32 +170,42 @@
       try {
         const res = await fetch(API_URL);
         const todos = await res.json();
-        const list = document.getElementById('todoList');
-        list.innerHTML = '';
-        todos.forEach(todo => {
+        renderTodos(todos);
+      } catch (err) {
+        console.error('Error fetching todos:', err);
+      }
+    }
+
+    function renderTodos(todos) {
+      const list = document.getElementById('todoList');
+      list.innerHTML = '';
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      todos
+        .filter(todo => todo.task.toLowerCase().includes(searchTerm))
+        .forEach(todo => {
           const li = document.createElement('li');
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.checked = todo.completed || false;
           checkbox.onchange = async () => { await toggleComplete(todo); };
+
           const span = document.createElement('span');
           span.textContent = todo.task;
           span.className = 'task-text';
           if (todo.completed) span.classList.add('completed');
           span.ondblclick = () => enableEditing(span, todo);
+
           const delBtn = document.createElement('button');
           delBtn.textContent = 'Delete';
           delBtn.className = 'delete-btn';
           delBtn.onclick = () => deleteTodo(todo.id);
+
           li.appendChild(checkbox);
           li.appendChild(span);
           li.appendChild(delBtn);
           list.appendChild(li);
         });
-        updateCounter(todos);
-      } catch (err) {
-        console.error('Error fetching todos:', err);
-      }
+      updateCounter(todos);
     }
 
     async function addTodo() {
@@ -256,16 +271,17 @@
       counter.textContent = `${total} tasks total (${completed} completed)`;
     }
 
-    function enableEditing(span, todo) {
+        function enableEditing(span, todo) {
       const input = document.createElement('input');
       input.type = 'text';
       input.value = todo.task;
       input.className = 'task-text';
       span.replaceWith(input);
       input.focus();
+
       const save = async () => {
         const newTask = input.value.trim();
-                 if (newTask && newTask !== todo.task) {
+        if (newTask && newTask !== todo.task) {
           await fetch(`${API_URL}/${todo.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -274,22 +290,27 @@
         }
         fetchTodos();
       };
+
       input.addEventListener('blur', save);
       input.addEventListener('keypress', e => {
         if (e.key === 'Enter') save();
       });
     }
 
+    // Auto-resizing input for new tasks
     const taskInput = document.getElementById('taskInput');
     taskInput.addEventListener('input', () => {
       const length = taskInput.value.length;
       const newWidth = Math.min(200 + length * 8, taskInput.parentElement.offsetWidth - 80);
       taskInput.style.width = newWidth + 'px';
     });
-
     document.getElementById('taskInput').addEventListener('keypress', e => {
       if (e.key === 'Enter') addTodo();
     });
+
+    // NEW FEATURE: Live search filter
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', fetchTodos);
 
     // Motivational Quotes Feature
     const quotes = [
@@ -300,7 +321,6 @@
       "Don't watch the clock; do what it does. Keep going.",
       "Success is the sum of small efforts repeated daily."
     ];
-
     function showQuote() {
       const quoteBox = document.getElementById('quoteBox');
       const randomIndex = Math.floor(Math.random() * quotes.length);

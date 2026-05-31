@@ -8,6 +8,7 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static('public'));
 
 // Get all todos
 app.get('/todos', (req, res) => {

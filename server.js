@@ -71,7 +71,7 @@ app.delete('/todos/:id', (req, res) => {
     });
 });
 
-// ONLY listen to the port when running locally
+// ONLY start a server listener if running locally (not on Vercel)
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
@@ -79,5 +79,5 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
-// Export the app for Vercel to handle serverless routing
+// Export the app instance for Vercel's serverless handler
 module.exports = app;

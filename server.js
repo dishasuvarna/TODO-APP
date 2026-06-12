@@ -79,5 +79,5 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
-// Export the app instance for Vercel's serverless handler
+// CRITICAL FOR VERCEL: Export the app instance
 module.exports = app;
